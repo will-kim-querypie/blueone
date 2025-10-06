@@ -38,6 +38,7 @@ export type CreateWorkRequestBody = { userId: User['id'] | null } & Pick<
   | 'charge'
   | 'adjustment'
   | 'subsidy'
+  | 'paymentType'
   | 'remark'
   | 'bookingDate'
 >;
