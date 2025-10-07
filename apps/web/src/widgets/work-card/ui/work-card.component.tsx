@@ -106,9 +106,9 @@ type GridRow = {
 function GridRow({ label, content, asterisk, copyable, className }: GridRow) {
   return (
     <>
-      <p
+      <Typography.Paragraph
         className={cn(
-          'text-right',
+          'text-base text-right',
           {
             'relative before:content-["*"] before:absolute before:-left-[0.2em] before:top-[0.65em] before:transform before:-translate-x-1/2 before:-translate-y-1/2':
               asterisk,
@@ -117,7 +117,7 @@ function GridRow({ label, content, asterisk, copyable, className }: GridRow) {
         )}
       >
         {label}:
-      </p>
+      </Typography.Paragraph>
       <Typography.Paragraph className={cn('text-base', className)} copyable={copyable}>
         {content}
       </Typography.Paragraph>

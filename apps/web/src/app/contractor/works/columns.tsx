@@ -22,7 +22,7 @@ const columns: ColumnsType<Item> = [
     sorter: {
       compare: (a, b) => +dayjs(a.createdAt).toDate() - +dayjs(b.createdAt).toDate(),
     },
-    width: 60,
+    width: 75,
   },
   {
     title: '예약 일시',
@@ -33,7 +33,7 @@ const columns: ColumnsType<Item> = [
     sorter: {
       compare: (a, b) => +dayjs(a.bookingDate).toDate() - +dayjs(b.bookingDate).toDate(),
     },
-    width: 95,
+    width: 110,
   },
   {
     title: '출발지',
@@ -124,7 +124,7 @@ const columns: ColumnsType<Item> = [
     key: 'checkTime',
     align: 'center',
     render: (_, record) => renderTime(record.checkTime, record.createdAt),
-    width: 95,
+    width: 110,
   },
   {
     title: '완료',
@@ -135,7 +135,7 @@ const columns: ColumnsType<Item> = [
     sorter: {
       compare: (a, b) => +!!a.endTime - +!!b.endTime,
     },
-    width: 95,
+    width: 110,
   },
   {
     title: 'Addition',

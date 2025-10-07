@@ -22,7 +22,7 @@ const createColumns = ({ totalUsers, onConfirmationClick }: ColumnsOptions): Col
     sorter: {
       compare: (a, b) => +(new Date(b.createdAt) || 0) - +(new Date(a.createdAt) || 0),
     },
-    width: 80,
+    width: 95,
     render: (_, record) => {
       return formatDateWithOptionalYear(record.createdAt);
     },
@@ -37,7 +37,7 @@ const createColumns = ({ totalUsers, onConfirmationClick }: ColumnsOptions): Col
     title: '기간',
     dataIndex: 'dateRange',
     key: 'dateRange',
-    width: 120,
+    width: 145,
     render: (_, record) => {
       const { startDate, endDate } = record;
 
