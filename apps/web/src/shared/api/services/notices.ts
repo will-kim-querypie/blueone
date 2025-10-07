@@ -13,6 +13,8 @@ import {
   RemoveRequest,
   RemoveResponse,
   GetActiveListResponse,
+  ConfirmRequest,
+  ConfirmResponse,
 } from '../types/notices';
 
 @Singleton
@@ -43,6 +45,10 @@ class NoticesService extends HTTPClient implements NoticesClient {
 
   public getActiveList = () => {
     return this.client.get<GetActiveListResponse>(`${this.ROUTE}/activation`);
+  };
+
+  public confirm = ({ noticeId }: ConfirmRequest) => {
+    return this.client.post<ConfirmResponse>(`${this.ROUTE}/${noticeId}/confirm`);
   };
 }
 

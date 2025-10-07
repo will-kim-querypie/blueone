@@ -27,6 +27,12 @@ class User extends Model {
     db.User.hasMany(db.Notice);
     db.User.hasMany(db.Work);
     db.User.hasOne(db.UserInfo);
+    db.User.belongsToMany(db.Notice, {
+      through: db.NoticeConfirmation,
+      foreignKey: 'userId',
+      otherKey: 'noticeId',
+      as: 'confirmedNotices',
+    });
   };
 }
 

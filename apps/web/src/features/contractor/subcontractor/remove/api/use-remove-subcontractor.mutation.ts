@@ -14,6 +14,12 @@ export default function useRemoveSubcontractor() {
       queryClient.invalidateQueries({
         queryKey: [QueryKeys.Subcontractors],
       });
+      queryClient.invalidateQueries({
+        queryKey: [QueryKeys.Notices],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [QueryKeys.ActiveNotices],
+      });
     },
   });
 }

@@ -70,6 +70,8 @@ export type Notice = {
   endDate: ISODateString;
   createdAt: ISODateString;
   updatedAt: ISODateString;
+  isConfirmed?: boolean; // 기사용: 현재 사용자의 확인 여부
+  confirmedUserIds?: number[]; // 관리자용: 확인한 사용자 ID 목록
 };
 
 export interface APIError {
@@ -407,6 +409,33 @@ export interface EndPoint {
   'GET /notices/activation': {
     responses: {
       200: Notice[];
+      500: APIError;
+    };
+  };
+  /**
+   * 공지사항 확인
+   */
+  'POST /notices/{noticeId}/confirm': {
+    responses: {
+      200: {
+        message: string;
+        confirmation: {
+          id: number;
+          noticeId: number;
+          userId: number;
+          confirmedAt: ISODateString;
+        };
+      };
+      201: {
+        message: string;
+        confirmation: {
+          id: number;
+          noticeId: number;
+          userId: number;
+          confirmedAt: ISODateString;
+        };
+      };
+      404: APIError;
       500: APIError;
     };
   };

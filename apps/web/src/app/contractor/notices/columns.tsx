@@ -6,9 +6,14 @@ import { Notice } from '@/shared/api/types';
 import dayjs from '@/shared/lib/utils/dayjs';
 import { packDateRange } from '@/shared/lib/utils/pack-date-range';
 import pick from '@/shared/lib/utils/pick';
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined, SearchOutlined } from '@ant-design/icons';
 
-const columns: ColumnsType<Notice> = [
+type ColumnsOptions = {
+  totalUsers: number;
+  onConfirmationClick: (notice: Notice) => void;
+};
+
+const createColumns = ({ totalUsers, onConfirmationClick }: ColumnsOptions): ColumnsType<Notice> => [
   {
     title: '일자',
     dataIndex: 'createdAt',
@@ -40,13 +45,42 @@ const columns: ColumnsType<Notice> = [
     },
   },
   {
+    title: '확인',
+    key: 'confirmation',
+    align: 'center',
+    width: 100,
+    render: (_, record) => {
+      const confirmedCount = record.confirmedUserIds?.length || 0;
+
+      const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+        e.stopPropagation();
+        onConfirmationClick(record);
+      };
+
+      return (
+        <Button
+          type="text"
+          size="small"
+          onClick={handleClick}
+          className="hover:text-primary"
+          icon={<SearchOutlined className="text-gray-400" />}
+          iconPosition="end"
+        >
+          <span className={confirmedCount === totalUsers ? 'text-green-600 font-semibold' : ''}>
+            {confirmedCount} / {totalUsers}
+          </span>
+        </Button>
+      );
+    },
+  },
+  {
     title: '',
     key: 'action',
     align: 'center',
     render: (_, record) => {
       return (
         // row onclick expand 를 특정 td 에서 실행하지 않기 위해 stopPropagation 적용
-        <div onClick={(e) => e.stopPropagation()} className="py-2 cursor-default">
+        <div onClick={e => e.stopPropagation()} className="py-2 cursor-default">
           <EditNotice
             id={record.id}
             initialValues={pick(packDateRange(record), ['title', 'content', 'dateRange'])}
@@ -79,7 +113,7 @@ const columns: ColumnsType<Notice> = [
   },
 ];
 
-export default columns;
+export default createColumns;
 
 function formatDateWithOptionalYear(date: string): string {
   const thisYear = dayjs().year();

@@ -1,6 +1,7 @@
 'use client';
 import { Card, List } from 'antd';
 import Linkify from 'linkify-react';
+import { ConfirmNoticeButton } from '@/features/subcontractor/confirm-notice';
 import { useFetchActiveNotices } from '@/features/subcontractor/list-active-notices';
 import { Empty } from '@/shared/ui/components/empty';
 
@@ -26,9 +27,10 @@ export default function NoticePage() {
               body: '!py-3 !px-4',
             }}
           >
-            <Linkify tagName="pre" className="whitespace-pre-wrap break-words font-[inherit]">
+            <Linkify tagName="pre" className="whitespace-pre-wrap break-words font-[inherit] mb-3">
               {item.content}
             </Linkify>
+            <ConfirmNoticeButton noticeId={item.id} isConfirmed={item.isConfirmed} />
           </Card>
         </List.Item>
       )}

@@ -21,6 +21,9 @@ export type RemoveResponse = EndPoint['DELETE /notices/{noticeId}']['responses']
 
 export type GetActiveListResponse = EndPoint['GET /notices/activation']['responses']['200'];
 
+export type ConfirmRequest = NoticeId;
+export type ConfirmResponse = EndPoint['POST /notices/{noticeId}/confirm']['responses']['201'];
+
 export interface NoticesClient {
   getList: (request: GetListRequest) => Promise<GetListResponse>;
   add: (request: AddRequest) => Promise<AddResponse>;
@@ -28,4 +31,5 @@ export interface NoticesClient {
   edit: (request: EditRequest) => Promise<EditResponse>;
   remove: (request: RemoveRequest) => Promise<RemoveResponse>;
   getActiveList: () => Promise<GetActiveListResponse>;
+  confirm: (request: ConfirmRequest) => Promise<ConfirmResponse>;
 }

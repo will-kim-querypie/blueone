@@ -19,12 +19,7 @@ export type DatePickQuery = {
 export type CreateUserRequestBody = Pick<User, 'phoneNumber'> &
   Pick<
     UserInfo,
-    | 'realname'
-    | 'dateOfBirth'
-    | 'licenseNumber'
-    | 'licenseType'
-    | 'insuranceNumber'
-    | 'insuranceExpirationDate'
+    'realname' | 'dateOfBirth' | 'licenseNumber' | 'licenseType' | 'insuranceNumber' | 'insuranceExpirationDate'
   >;
 export type UpdateUserRequestBody = CreateUserRequestBody;
 
@@ -44,11 +39,31 @@ export type CreateWorkRequestBody = { userId: User['id'] | null } & Pick<
 >;
 export type UpdateWorkRequestBody = CreateWorkRequestBody;
 
-export type CreateNoticeRequestBody = Pick<
-  Notice,
-  'title' | 'content' | 'startDate' | 'endDate'
->;
+export type CreateNoticeRequestBody = Pick<Notice, 'title' | 'content' | 'startDate' | 'endDate'>;
 export type UpdateNoticeRequestBody = CreateNoticeRequestBody;
+
+type NoticeData = {
+  id: number;
+  userId: number;
+  title: string;
+  content: string;
+  startDate: Date;
+  endDate: Date;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type NoticeWithConfirmedUsers = NoticeData & {
+  confirmedUsers?: Array<{ id: number }>;
+};
+
+export type NoticeDtoForContractor = NoticeData & {
+  confirmedUserIds: number[];
+};
+
+export type NoticeDtoForSubcontractor = NoticeData & {
+  isConfirmed: boolean;
+};
 
 export enum PaymentType {
   DIRECT = 'DIRECT',

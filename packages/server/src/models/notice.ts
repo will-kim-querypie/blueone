@@ -14,6 +14,12 @@ class Notice extends Model {
 
   public static associate = (db: Database): void => {
     db.Notice.belongsTo(db.User, { foreignKey: 'userId' });
+    db.Notice.belongsToMany(db.User, {
+      through: db.NoticeConfirmation,
+      foreignKey: 'noticeId',
+      otherKey: 'userId',
+      as: 'confirmedUsers',
+    });
   };
 }
 

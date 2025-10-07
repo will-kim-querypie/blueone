@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import express from 'express';
 import type { CreateUserRequestBody, UpdateUserRequestBody } from 'typings';
 import { isContractor, isLoggedIn } from '@/middlewares';
-import { User, UserInfo, Work } from '@/models';
+import { User, UserInfo, Work, NoticeConfirmation } from '@/models';
 import { withPayout } from '@/utils/calculate-payout';
 import omit from '@/utils/omit';
 import { getDefaultWhereParamsQueriedByWork } from '@/utils/query/work';
@@ -23,7 +23,7 @@ router.get('/', isLoggedIn, isContractor, async (_req, res, next) => {
       include: [UserInfo],
       order: [[UserInfo, 'realname', 'ASC']],
     });
-    res.status(200).json(users.map((user) => user.get()));
+    res.status(200).json(users.map(user => user.get()));
   } catch (err) {
     console.error(err);
     next(err);
@@ -185,6 +185,11 @@ router.delete('/:userId', isLoggedIn, isContractor, async (req, res, next) => {
       return;
     }
 
+    // 공지사항 확인 기록 삭제
+    await NoticeConfirmation.destroy({
+      where: { userId },
+    });
+
     await user.destroy();
     res.status(200).json(user.get());
   } catch (err) {
@@ -195,27 +200,22 @@ router.delete('/:userId', isLoggedIn, isContractor, async (req, res, next) => {
 /**
  * 활성화된 유저 업무 가져오기
  */
-router.get(
-  '/:userId/works',
-  isLoggedIn,
-  isContractor,
-  async (req, res, next) => {
-    const { userId } = req.params;
+router.get('/:userId/works', isLoggedIn, isContractor, async (req, res, next) => {
+  const { userId } = req.params;
 
-    try {
-      const activatedWorks = await Work.findAll({
-        where: {
-          ...getDefaultWhereParamsQueriedByWork(),
-          userId,
-          endTime: null,
-        },
-        order: [['createdAt', 'DESC']],
-      });
-      res.status(200).json(activatedWorks.map(withPayout));
-    } catch (err) {
-      next(err);
-    }
-  },
-);
+  try {
+    const activatedWorks = await Work.findAll({
+      where: {
+        ...getDefaultWhereParamsQueriedByWork(),
+        userId,
+        endTime: null,
+      },
+      order: [['createdAt', 'DESC']],
+    });
+    res.status(200).json(activatedWorks.map(withPayout));
+  } catch (err) {
+    next(err);
+  }
+});
 
 export default router;
