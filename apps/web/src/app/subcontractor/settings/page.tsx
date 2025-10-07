@@ -1,5 +1,5 @@
 'use client';
-import { Avatar, Button, Card, List } from 'antd';
+import { Avatar, Button, Card, List, Typography } from 'antd';
 import { useFetchMe } from '@/entities/me';
 import { useSignOut } from '@/features/sign-out';
 import { ChangePassword } from '@/features/subcontractor/change-password';
@@ -27,7 +27,7 @@ export default function SettingPage() {
           로그아웃
         </Button>,
       ]}
-      renderItem={(item) => <List.Item>{item}</List.Item>}
+      renderItem={item => <List.Item>{item}</List.Item>}
       className="p-[unset]"
     />
   );
@@ -41,11 +41,13 @@ function SettingsHeader() {
     <Card>
       <Card.Meta
         avatar={<Avatar icon={<UserOutlined />} size={54} className="bg-primary" />}
-        title={<p className="text-lg mt-0.5">{me.UserInfo?.realname || 'Contractor'}</p>}
+        title={
+          <Typography.Text className="text-lg mt-0.5 block">{me.UserInfo?.realname || 'Contractor'}</Typography.Text>
+        }
         description={
           <>
             <PhoneOutlined className="transform rotate-90 mr-1 text-lg" />
-            <span>{processPhoneNumber(me.phoneNumber)}</span>
+            <Typography.Text>{processPhoneNumber(me.phoneNumber)}</Typography.Text>
           </>
         }
       />

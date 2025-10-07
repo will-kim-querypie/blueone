@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { ReactNode, useEffect } from 'react';
-import { App, Button, ConfigProvider, theme } from 'antd';
+import { App, Button, ConfigProvider, theme, Typography } from 'antd';
 import { useFetchMe } from '@/entities/me';
 import cn from '@/shared/lib/utils/cn';
 import { ArrowLeftOutlined } from '@ant-design/icons';
@@ -12,9 +12,9 @@ export default function SubcontractorLayout({ children }: { children: ReactNode 
   const router = useRouter();
   const pathname = usePathname();
 
-  const headerText = navItems.find((item) => item.href === pathname)?.text;
-  const bodyNoPadding = ['analysis', 'settings'].some((v) => pathname.endsWith(v));
-  const showBack = ['completed-works'].some((v) => pathname.endsWith(v));
+  const headerText = navItems.find(item => item.href === pathname)?.text;
+  const bodyNoPadding = ['analysis', 'settings'].some(v => pathname.endsWith(v));
+  const showBack = ['completed-works'].some(v => pathname.endsWith(v));
 
   const goBack = () => {
     router.back();
@@ -56,12 +56,12 @@ export default function SubcontractorLayout({ children }: { children: ReactNode 
 
               <footer className="bg-black px-4">
                 <nav className="flex justify-between">
-                  {navItems.map((item) => {
+                  {navItems.map(item => {
                     if (item.parentPageHref) {
                       return null;
                     }
                     const isParentOfCurrPage = !!navItems.find(
-                      (t) => t.parentPageHref && t.parentPageHref === item.href && t.href === pathname,
+                      t => t.parentPageHref && t.parentPageHref === item.href && t.href === pathname,
                     );
                     return (
                       <NavItem key={item.href} item={item} active={item.href === pathname || isParentOfCurrPage} />
@@ -89,7 +89,7 @@ function NavItem({ item, active }: { active: boolean; item: NavItem }) {
   return (
     <Link href={item.href} className={cn('flex-1 flexColCenter gap-2 py-4', active ? '!text-white' : '!text-gray-500')}>
       {active ? item.fillIcon : item.outlineIcon}
-      <p className="text-sm text-center">{item.text}</p>
+      <Typography.Text className="text-sm text-center">{item.text}</Typography.Text>
     </Link>
   );
 }

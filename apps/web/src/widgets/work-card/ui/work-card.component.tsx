@@ -55,9 +55,9 @@ export default function WorkCard({ work, readOnly = false, className }: Props) {
       {!!work.endTime && <WorkDoneStamp />}
 
       {readOnly && !!work.endTime && (
-        <p className="text-lg mb-2">
+        <Typography.Text className="text-lg mb-2 block">
           <b>{dayjs(work.endTime).format('MM-DD')}</b>
-        </p>
+        </Typography.Text>
       )}
 
       <div className="grid grid-cols-[max-content_1fr] gap-x-2 gap-y-1">

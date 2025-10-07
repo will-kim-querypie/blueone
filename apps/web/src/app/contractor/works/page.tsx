@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
-import { Button, Checkbox, DatePicker, Table } from 'antd';
+import { Button, Checkbox, DatePicker, Table, Typography } from 'antd';
 import { RangePickerProps } from 'antd/es/date-picker';
 import { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
@@ -30,7 +30,7 @@ export default function WorksManagementPage() {
   const [dateRange, setDateRange] = useState<DateRange>(defaultDateRange);
   const [pickedUserId, setPickedUserId] = useState<User['id']>();
   const [showPastCompletedWorks, togglePastCompletedWorks] = useBool(false);
-  const [showBookedWorks, toggleBookedWorks] = useBool(false, (next) => {
+  const [showBookedWorks, toggleBookedWorks] = useBool(false, next => {
     if (next) {
       setDateRange(defaultBookingDateRange);
     } else {
@@ -46,11 +46,11 @@ export default function WorksManagementPage() {
   const dataSource = useMemo<GetListResponse>(() => {
     if (!works) return [];
     return works
-      .filter((work) => {
+      .filter(work => {
         const isCompletedAtPast = !!work.endTime && +new Date(work.endTime) < times.todayStart.valueOf();
         return showPastCompletedWorks || !isCompletedAtPast;
       })
-      .filter((work) => {
+      .filter(work => {
         if (!pickedUserId) return true;
         return work.userId === pickedUserId;
       });
@@ -58,9 +58,9 @@ export default function WorksManagementPage() {
 
   const filteredColumns = useMemo<ColumnsType<ItemOf<GetListResponse>>>(() => {
     if (showBookedWorks) {
-      return columns.filter((v) => v.key !== 'createdAt');
+      return columns.filter(v => v.key !== 'createdAt');
     }
-    return columns.filter((v) => v.key !== 'bookingDate');
+    return columns.filter(v => v.key !== 'bookingDate');
   }, [showBookedWorks]);
 
   const handleChangeRangePicker: NonNullable<RangePickerProps['onChange']> = (_, [startDate, endDate]) => {
@@ -153,23 +153,23 @@ export default function WorksManagementPage() {
 
       <div className="flex-1 w-full overflow-x-auto">
         <Table
-          rowKey={(work) => work.id}
+          rowKey={work => work.id}
           dataSource={dataSource}
           columns={filteredColumns}
-          rowClassName={(record) => {
+          rowClassName={record => {
             if (!record.endTime) return 'bg-white';
 
             return 'bg-gray-300 [&_.ant-table-cell-row-hover]:!bg-gray-300';
           }}
           expandable={{
-            columnTitle: <span className="whitespace-nowrap">비고</span>,
+            columnTitle: <Typography.Text className="whitespace-nowrap">비고</Typography.Text>,
             columnWidth: 40,
             expandedRowRender: renderRemark,
             expandIcon: ({ onExpand, record }) => {
               if (!record.remark) return null;
-              return <SnippetsOutlined onClick={(e) => onExpand(record, e)} />;
+              return <SnippetsOutlined onClick={e => onExpand(record, e)} />;
             },
-            rowExpandable: (record) => !!record.remark,
+            rowExpandable: record => !!record.remark,
           }}
           showSorterTooltip={false}
           pagination={{ position: ['bottomLeft'] }}
@@ -184,7 +184,7 @@ export default function WorksManagementPage() {
 function renderRemark(work: ItemOf<GetListResponse>) {
   return (
     <div className="p-1 text-center">
-      <span className="underline">비고:</span>
+      <Typography.Text className="underline">비고:</Typography.Text>
       &nbsp;
       {work.remark ?? '-'}
     </div>

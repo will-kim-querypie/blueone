@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { Button, Table, Tooltip } from 'antd';
+import { Button, Table, Tooltip, Typography } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import { AddWork } from '@/features/contractor/work/add';
@@ -228,7 +228,11 @@ function renderTime(targetTime: string | undefined, createdAt: Item['createdAt']
   const day = dayjs(targetTime);
   const isCreatedDay = day.startOf('day').isSame(dayjs(createdAt).startOf('day'));
 
-  return <span className="whitespace-nowrap">{day.format(isCreatedDay ? 'HH:mm' : 'MM/DD_HH:mm')}</span>;
+  return (
+    <Typography.Text className="whitespace-nowrap">
+      {day.format(isCreatedDay ? 'HH:mm' : 'MM/DD_HH:mm')}
+    </Typography.Text>
+  );
 }
 
 function renderDate(targetDate?: string, withTime?: boolean): ReactNode {
@@ -240,5 +244,5 @@ function renderDate(targetDate?: string, withTime?: boolean): ReactNode {
   const formatFront = inThisYear ? 'MM/DD' : 'YYYY/MM/DD';
   const formatBack = withTime ? ' HH:00' : '';
 
-  return <span className="whitespace-nowrap">{day.format(formatFront + formatBack)}</span>;
+  return <Typography.Text className="whitespace-nowrap">{day.format(formatFront + formatBack)}</Typography.Text>;
 }

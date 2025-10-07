@@ -1,4 +1,4 @@
-import { Skeleton } from 'antd';
+import { Skeleton, Typography } from 'antd';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -22,7 +22,7 @@ export default function AnalyzeByMonth({ chartHeight }: { chartHeight: number })
   const { data: analysis } = useAnalyzeIncome({ by: 'day' });
 
   const chartData: ChartData<'bar', number[], string> = {
-    labels: Object.keys(analysis ?? {}).map((month) => `${month}일`),
+    labels: Object.keys(analysis ?? {}).map(month => `${month}일`),
     datasets: [
       {
         label: '지수합계',
@@ -52,9 +52,15 @@ export default function AnalyzeByMonth({ chartHeight }: { chartHeight: number })
   return (
     <>
       <header className="mt-4 mb-6">
-        <p className="text-sm mb-2.5 text-gray-400">※ 익일입고는 확인 시점으로 정산됩니다.</p>
-        {thisDate !== 1 && <p>어제자 지수 합계: {analysis[`${thisDate - 1}`]}</p>}
-        <h1 className="text-white text-xl">오늘자 지수 합계: {analysis[`${thisDate}`]}</h1>
+        <Typography.Text className="text-sm mb-2.5 text-gray-400 block">
+          ※ 익일입고는 확인 시점으로 정산됩니다.
+        </Typography.Text>
+        {thisDate !== 1 && (
+          <Typography.Text className="block">어제자 지수 합계: {analysis[`${thisDate - 1}`]}</Typography.Text>
+        )}
+        <Typography.Title level={3} className="text-white text-xl">
+          오늘자 지수 합계: {analysis[`${thisDate}`]}
+        </Typography.Title>
       </header>
 
       <Bar data={chartData} options={options} height={chartHeight} />

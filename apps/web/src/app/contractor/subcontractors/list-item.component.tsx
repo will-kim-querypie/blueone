@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { Avatar, Button, List, Tooltip } from 'antd';
+import { Avatar, Button, List, Tooltip, Typography } from 'antd';
 import { Me } from '@/entities/me';
 import { EditSubcontractor } from '@/features/contractor/subcontractor/edit';
 import { RemoveSubcontractor } from '@/features/contractor/subcontractor/remove';
@@ -70,12 +70,12 @@ export default function ListItem({ contractor }: Props) {
         title={renderTitle(insuranceInfo.state, contractor.UserInfo.realname)}
         description={
           <div className={cn({ 'line-through': insuranceInfo.state === 'expired' })}>
-            <p>{processPhoneNumber(contractor.phoneNumber)}</p>
-            <p>
+            <Typography.Text className="block">{processPhoneNumber(contractor.phoneNumber)}</Typography.Text>
+            <Typography.Text className="block">
               {insuranceInfo.state === 'expired'
                 ? '보험이 만료되었습니다'
                 : `보험 만료일: ${contractor.UserInfo.insuranceExpirationDate} (${insuranceInfo.to})`}
-            </p>
+            </Typography.Text>
           </div>
         }
       />
@@ -86,11 +86,11 @@ export default function ListItem({ contractor }: Props) {
 function renderTitle(state: Me.InsuranceState, realname: string): ReactNode {
   switch (state) {
     case 'normal':
-      return <span>{realname}</span>;
+      return <Typography.Text>{realname}</Typography.Text>;
     case 'nearExpiration':
       return (
         <>
-          <span>{realname}</span>&nbsp;
+          <Typography.Text>{realname}</Typography.Text>&nbsp;
           <Tooltip title="보험 만료가 얼마 남지 않았습니다.">
             <WarningOutlined className="align-text-top text-yellow-500" />
           </Tooltip>
@@ -99,13 +99,13 @@ function renderTitle(state: Me.InsuranceState, realname: string): ReactNode {
     case 'expired':
       return (
         <>
-          <span className="line-through">{realname}</span>&nbsp;
+          <Typography.Text className="line-through">{realname}</Typography.Text>&nbsp;
           <Tooltip title="보험이 만료되었습니다.">
             <WarningOutlined className="align-text-top text-red-500" />
           </Tooltip>
         </>
       );
     default:
-      return <span>{realname}</span>;
+      return <Typography.Text>{realname}</Typography.Text>;
   }
 }
