@@ -9,10 +9,9 @@ const regex = {
   licenseNumber: /^[\d-가-힣ㄱ-ㅎ]{1,32}$/,
   insuranceNumber: /^[\d-]{1,32}$/,
 };
-const validate: { [column in keyof typeof regex]: ModelValidateOptions } =
-  Object.fromEntries(
-    Object.entries(regex).map((column, regex) => [column, { is: regex }]),
-  );
+const validate: { [column in keyof typeof regex]: ModelValidateOptions } = Object.fromEntries(
+  Object.entries(regex).map((column, regex) => [column, { is: regex }]),
+);
 
 class UserInfo extends Model {
   public readonly id!: number;
@@ -33,6 +32,11 @@ class UserInfo extends Model {
 
 UserInfo.init(
   {
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      field: 'user_id',
+    },
     realname: {
       type: DataTypes.STRING(32),
       validate: validate.phoneNumber,
@@ -42,29 +46,32 @@ UserInfo.init(
       type: DataTypes.STRING(6),
       validate: validate.dateOfBirth,
       allowNull: false,
+      field: 'date_of_birth',
     },
     licenseNumber: {
       type: DataTypes.STRING(32),
       validate: validate.licenseNumber,
       allowNull: false,
+      field: 'license_number',
     },
     licenseType: {
       type: DataTypes.STRING(32),
       allowNull: false,
+      field: 'license_type',
     },
     insuranceNumber: {
       type: DataTypes.STRING(32),
       validate: validate.insuranceNumber,
       allowNull: false,
+      field: 'insurance_number',
     },
     insuranceExpirationDate: {
       type: DataTypes.DATEONLY,
       get() {
-        return dayjs(this.getDataValue('insuranceExpirationDate')).format(
-          'YYYY-MM-DD',
-        );
+        return dayjs(this.getDataValue('insuranceExpirationDate')).format('YYYY-MM-DD');
       },
       allowNull: false,
+      field: 'insurance_expiration_date',
     },
   },
   {
@@ -72,6 +79,7 @@ UserInfo.init(
     tableName: 'user_info',
     modelName: 'UserInfo',
     timestamps: true,
+    underscored: true,
   },
 );
 

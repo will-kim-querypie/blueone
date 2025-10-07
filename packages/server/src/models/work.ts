@@ -28,6 +28,11 @@ class Work extends Model {
 
 Work.init(
   {
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      field: 'user_id',
+    },
     origin: {
       type: DataTypes.STRING(255),
       allowNull: false,
@@ -42,6 +47,7 @@ Work.init(
     carModel: {
       type: DataTypes.STRING(255),
       allowNull: false,
+      field: 'car_model',
     },
     charge: {
       type: DataTypes.MEDIUMINT,
@@ -59,19 +65,23 @@ Work.init(
         isIn: [Object.values(PaymentType)],
       },
       allowNull: false,
+      field: 'payment_type',
     },
     remark: {
       type: DataTypes.TEXT,
     },
     checkTime: {
       type: DataTypes.DATE,
+      field: 'check_time',
     },
     endTime: {
       type: DataTypes.DATE,
+      field: 'end_time',
     },
     bookingDate: {
       type: DataTypes.DATE,
       allowNull: true,
+      field: 'booking_date',
     },
   },
   {
@@ -79,6 +89,7 @@ Work.init(
     tableName: 'work',
     modelName: 'Work',
     timestamps: true,
+    underscored: true,
   },
 );
 

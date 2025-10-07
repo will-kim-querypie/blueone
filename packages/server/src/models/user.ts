@@ -51,6 +51,7 @@ User.init(
         is: /^\d{7,20}$/,
       },
       allowNull: false,
+      field: 'phone_number',
     },
     password: {
       type: DataTypes.STRING(255),
@@ -63,6 +64,7 @@ User.init(
     modelName: 'User',
     timestamps: true,
     paranoid: true,
+    underscored: true,
   },
 );
 

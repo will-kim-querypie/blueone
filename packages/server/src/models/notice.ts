@@ -25,6 +25,11 @@ class Notice extends Model {
 
 Notice.init(
   {
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      field: 'user_id',
+    },
     title: {
       type: DataTypes.STRING(20),
       allowNull: false,
@@ -36,10 +41,12 @@ Notice.init(
     startDate: {
       type: DataTypes.DATEONLY,
       allowNull: false,
+      field: 'start_date',
     },
     endDate: {
       type: DataTypes.DATEONLY,
       allowNull: false,
+      field: 'end_date',
     },
   },
   {
@@ -47,6 +54,7 @@ Notice.init(
     tableName: 'notice',
     modelName: 'Notice',
     timestamps: true,
+    underscored: true,
   },
 );
 
