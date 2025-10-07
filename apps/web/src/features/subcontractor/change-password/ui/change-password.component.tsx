@@ -43,8 +43,6 @@ export default function ChangePassword({ trigger }: Props) {
         onCancel={onClose}
         okText="변경"
         cancelText="취소"
-        okButtonProps={{ size: 'large' }}
-        cancelButtonProps={{ size: 'large' }}
         confirmLoading={isPending}
         centered
         destroyOnClose

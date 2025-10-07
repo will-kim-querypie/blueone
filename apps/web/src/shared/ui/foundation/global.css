@@ -60,6 +60,73 @@
   margin-top: 20px !important;
 }
 
+/* 모바일 전용: 모달 접근성 개선 */
+@media screen and (max-width: theme('screens.md')) {
+  .ant-modal-footer {
+    /* 모바일 모달 버튼 세로 배치 */
+    display: flex !important;
+    flex-direction: column-reverse !important;
+    gap: 10px !important;
+
+    button {
+      margin: 0 !important;
+      width: 100% !important;
+      height: 48px !important;
+      font-size: 18px !important;
+      font-weight: 600 !important;
+    }
+  }
+
+  .ant-modal-title {
+    font-size: 22px !important;
+    font-weight: 700 !important;
+  }
+
+  .ant-modal-body {
+    font-size: 19px !important;
+    line-height: 1.7 !important;
+  }
+
+  /* Popconfirm 모바일 접근성 개선 */
+  .ant-popconfirm {
+    max-width: 360px;
+
+    .ant-popconfirm-title {
+      font-size: 20px !important;
+      font-weight: 700 !important;
+      margin-bottom: 16px !important;
+    }
+
+    .ant-popconfirm-description {
+      font-size: 18px !important;
+      line-height: 1.7 !important;
+    }
+
+    .ant-popconfirm-buttons {
+      display: flex !important;
+      flex-direction: column-reverse !important;
+      gap: 8px !important;
+      margin-top: 16px !important;
+
+      button {
+        margin: 0 !important;
+        width: 100% !important;
+        height: 46px !important;
+        font-size: 17px !important;
+        font-weight: 600 !important;
+      }
+    }
+  }
+
+  /* 토스트(메시지) 텍스트 크기 증가 */
+  .ant-message {
+    .ant-message-notice-content {
+      font-size: calc(14px + 4px) !important;
+      line-height: 1.6 !important;
+    }
+  }
+}
+
 .ant-typography {
   margin: unset !important;
 }
