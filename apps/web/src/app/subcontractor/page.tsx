@@ -42,11 +42,11 @@ export default function SubcontractorHomePage() {
         </>
       )}
 
-      <RecentNoticeAlert onClick={handleClickNotice} className="absolute left-0 w-full px-4" />
+      <RecentNoticeAlert onClick={handleClickNotice} className="absolute left-0 w-full px-2" />
 
-      <WorkCarousel works={works} renderItem={(work) => <WorkCard key={work.id} work={work} />} />
+      <WorkCarousel works={works} renderItem={work => <WorkCard key={work.id} work={work} />} />
 
-      <div className="absolute bottom-4 right-4">
+      <div className="absolute bottom-1 right-2">
         <Button type="text">
           <Link href="/subcontractor/completed-works">→ 완료된 업무 열람</Link>
         </Button>

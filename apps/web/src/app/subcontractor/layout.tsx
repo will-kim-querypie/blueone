@@ -33,7 +33,7 @@ export default function SubcontractorLayout({ children }: { children: ReactNode 
         <App notification={{ maxCount: 1 }}>
           <div className="w-full max-w-lg h-screen mx-auto flexRowCenter bg-gray-950">
             <div className="w-full h-full flex flex-col">
-              <header className="relative flex justify-center items-center mb-5 p-4 gap-4">
+              <header className="relative flex justify-center items-center pt-4 pb-2 px-4 gap-4">
                 {showBack && (
                   <Button
                     className="absolute left-4 text-white"
@@ -43,12 +43,12 @@ export default function SubcontractorLayout({ children }: { children: ReactNode 
                     onClick={goBack}
                   />
                 )}
-                <h1 className="text-2xl text-white">{headerText}</h1>
+                <h1 className="text-xl text-white">{headerText}</h1>
               </header>
 
               <main
                 className={cn('flex-1 flex flex-col relative overflow-y-auto scrollbar-hide', {
-                  'p-4': !bodyNoPadding,
+                  'p-2': !bodyNoPadding,
                 })}
               >
                 {children}
