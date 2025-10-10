@@ -16,7 +16,6 @@ const antdTheme: ThemeConfig = {
   token: {
     colorPrimary: theme.colors.primary,
     borderRadius: 4,
-    fontSize: 18,
   },
   components: {
     Alert: {

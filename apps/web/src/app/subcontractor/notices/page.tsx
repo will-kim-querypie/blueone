@@ -19,18 +19,18 @@ export default function NoticePage() {
       grid={{ gutter: 16, column: 1 }}
       dataSource={notices}
       renderItem={item => (
-        <List.Item className="border-t-2 border-solid border-primary rounded-t-none">
+        <List.Item>
           <Card
             title={item.title}
+            className="border-l-0 border-r-0 border-t-2 border-b-2 border-solid border-primary rounded-none"
             classNames={{
               header: '!p-3 !min-h-[unset]',
               body: '!py-3 !px-4',
             }}
-            styles={{ header: { fontSize: '20px' } }}
           >
             <div className="mb-3 min-h-[100px]">
               <Linkify tagName="pre" className="whitespace-pre-wrap break-words font-[inherit]">
-                <Typography.Text style={{ fontSize: '20px' }}>{item.content}</Typography.Text>
+                <Typography.Text>{item.content}</Typography.Text>
               </Linkify>
             </div>
             <ConfirmNoticeButton noticeId={item.id} isConfirmed={item.isConfirmed} />

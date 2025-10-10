@@ -56,22 +56,22 @@ export default function ConfirmationStatusModal({ visible, onClose, confirmedUse
   return (
     <Modal {...modalProps}>
       <div className="space-y-3 mb-4">
-        <div className="text-sm text-gray-600">확인 ({confirmedUsers.length}명)</div>
+        <div className="text-gray-600">확인 ({confirmedUsers.length}명)</div>
         <div className="flex flex-wrap gap-1">
           {!confirmedUsers.length && '-'}
           {confirmedUsers.map(user => (
-            <Tag key={user.id} className="mr-0 text-sm">
+            <Tag key={user.id} className="mr-0">
               {user.UserInfo.realname}
             </Tag>
           ))}
         </div>
       </div>
       <div className="space-y-3">
-        <div className="text-sm text-gray-600">미확인 ({unconfirmedUsers.length}명)</div>
+        <div className="text-gray-600">미확인 ({unconfirmedUsers.length}명)</div>
         <div className="flex flex-wrap gap-1">
           {!unconfirmedUsers.length && '-'}
           {unconfirmedUsers.map(user => (
-            <Tag key={user.id} className="mr-0 text-sm">
+            <Tag key={user.id} className="mr-0">
               {user.UserInfo.realname}
             </Tag>
           ))}
