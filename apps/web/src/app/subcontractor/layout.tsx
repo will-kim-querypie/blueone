@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { ReactNode, useEffect } from 'react';
 import { App, Button, ConfigProvider, theme, Typography } from 'antd';
+import dayjs from 'dayjs';
+import 'dayjs/locale/ko';
 import { useFetchMe } from '@/entities/me';
 import cn from '@/shared/lib/utils/cn';
 import { ArrowLeftOutlined } from '@ant-design/icons';
@@ -12,9 +14,13 @@ export default function SubcontractorLayout({ children }: { children: ReactNode 
   const router = useRouter();
   const pathname = usePathname();
 
-  const headerText = navItems.find(item => item.href === pathname)?.text;
   const bodyNoPadding = ['analysis', 'settings'].some(v => pathname.endsWith(v));
   const showBack = ['completed-works'].some(v => pathname.endsWith(v));
+
+  const isMainPage = pathname === '/subcontractor';
+  const navText = navItems.find(item => item.href === pathname)?.text;
+  const currentDateText = dayjs().locale('ko').format('MM/DD(ddd) 일정');
+  const headerText = isMainPage ? currentDateText : navText;
 
   const goBack = () => {
     router.back();
@@ -33,7 +39,7 @@ export default function SubcontractorLayout({ children }: { children: ReactNode 
         <App notification={{ maxCount: 1 }}>
           <div className="w-full max-w-lg h-screen mx-auto flexRowCenter bg-gray-950">
             <div className="w-full h-full flex flex-col">
-              <header className="relative flex justify-center items-center pt-4 pb-2 px-4 gap-4">
+              <header className="relative flex justify-center items-center pt-4 pb-2 mb-1 px-4 gap-4 border-b border-solid border-primary">
                 {showBack && (
                   <Button
                     className="absolute left-4 text-white"

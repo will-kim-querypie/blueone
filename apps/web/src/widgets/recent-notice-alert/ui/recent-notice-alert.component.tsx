@@ -1,4 +1,4 @@
-import { Alert } from 'antd';
+import { Alert, Typography } from 'antd';
 import Marquee from 'react-fast-marquee';
 import { useFetchActiveNotices } from '@/features/subcontractor/list-active-notices';
 import cn from '@/shared/lib/utils/cn';
@@ -20,8 +20,8 @@ export default function RecentNoticeAlert({ onClick, className }: Props) {
         type="info"
         onClick={onClick}
         message={
-          <Marquee delay={5} gradient={false} className="text-white">
-            공지사항&nbsp;-&nbsp;{recentNotice.title}
+          <Marquee delay={5} gradient={false}>
+            <Typography.Text className="text-white text-base">공지사항 - {recentNotice.title}</Typography.Text>
           </Marquee>
         }
       />

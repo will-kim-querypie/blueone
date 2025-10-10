@@ -30,23 +30,41 @@ export default function WorkCard({ work, readOnly = false, className }: Props) {
         </Typography.Text>
       )}
 
-      <div className="border border-solid border-gray-500 rounded-sm overflow-hidden">
+      <div className="border border-solid border-white rounded-sm overflow-hidden bg-blue-900">
         <GridRow label="출발지" content={work.origin} />
         <GridRow label="경유지" content={work.waypoint || ''} />
         <GridRow label="도착지" content={work.destination} />
         <GridRow label="차종" content={work.carModel} />
         <GridRow label="비고" content={work.remark || ''} />
-        <GridRow label="구간지수" content={work.charge} asterisk />
+        <GridRow label="구간지수" content={work.charge} />
         <GridRow label="할인/할증" content={work.adjustment || ''} />
         <GridRow label="지원" content={work.subsidy || ''} />
 
         {work.paymentType === PaymentType.DIRECT && (
-          <GridRow label="직불" content={work.payout} valueClassName="font-bold text-primary" />
+          <>
+            <GridRow
+              label="직불"
+              content={work.payout}
+              labelClassName="!text-blue-500"
+              valueClassName="font-bold !text-blue-500"
+            />
+            <GridRow label="정산" content="" labelClassName="!text-red-500" valueClassName="font-bold !text-red-500" />
+          </>
         )}
         {work.paymentType === PaymentType.CASH && (
           <>
-            <GridRow label="현불" content={work.payout} valueClassName="font-bold text-red-500" />
-            <GridRow label="정산" content={work.fee} valueClassName="font-bold text-primary" />
+            <GridRow
+              label="현불"
+              content={work.payout}
+              labelClassName="!text-blue-500"
+              valueClassName="font-bold !text-blue-500"
+            />
+            <GridRow
+              label="정산"
+              content={work.fee}
+              labelClassName="!text-red-500"
+              valueClassName="font-bold !text-red-500"
+            />
           </>
         )}
       </div>
@@ -101,15 +119,19 @@ function getWorkActions(work: Work) {
 type GridRow = {
   label: string;
   content: string | number;
-  asterisk?: boolean;
+  labelClassName?: string;
   valueClassName?: string;
 };
-function GridRow({ label, content, asterisk, valueClassName }: GridRow) {
+function GridRow({ label, content, labelClassName, valueClassName }: GridRow) {
   return (
-    <div className="grid grid-cols-[1fr_1fr] border-b border-solid border-gray-500 last:border-b-0">
-      <div className="text-base text-center py-1 px-3 bg-slate-900 text-white font-semibold border-r border-solid border-gray-500">
+    <div className="grid grid-cols-[1fr_1fr] border-b border-solid border-white last:border-b-0">
+      <div
+        className={cn(
+          'text-base text-center py-1 px-3 bg-slate-900 text-white font-semibold border-r border-solid border-white',
+          labelClassName,
+        )}
+      >
         {label}
-        {asterisk && <span className="text-red-500 ml-0.5">*</span>}
       </div>
       <Typography.Paragraph className={cn('text-base text-center py-1 px-3 mb-0', valueClassName)}>
         {content}

@@ -47,7 +47,7 @@ export default function SubcontractorHomePage() {
       <WorkCarousel works={works} renderItem={work => <WorkCard key={work.id} work={work} />} />
 
       <div className="absolute bottom-1 right-2">
-        <Button type="text">
+        <Button size="large" type="text">
           <Link href="/subcontractor/completed-works">→ 완료된 업무 열람</Link>
         </Button>
       </div>

@@ -27,14 +27,14 @@ export default function ConfirmNoticeButton({ noticeId, isConfirmed }: ConfirmNo
 
   if (isConfirmed) {
     return (
-      <Button type="default" icon={<CheckCircleOutlined />} disabled block>
+      <Button size="large" type="default" icon={<CheckCircleOutlined />} disabled block>
         확인 완료
       </Button>
     );
   }
 
   return (
-    <Button type="primary" icon={<CheckOutlined />} onClick={handleConfirm} loading={isPending} block>
+    <Button size="large" type="primary" icon={<CheckOutlined />} onClick={handleConfirm} loading={isPending} block>
       공지 확인
     </Button>
   );
