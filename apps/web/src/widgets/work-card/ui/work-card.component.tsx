@@ -130,7 +130,7 @@ function GridRow({ label, content, labelClassName, valueClassName }: GridRow) {
       >
         {label}
       </div>
-      <Typography.Paragraph className={cn('text-center py-1 px-3 mb-0', valueClassName)}>
+      <Typography.Paragraph className={cn('text-center py-1 px-3 mb-0 font-semibold', valueClassName)}>
         {content}
       </Typography.Paragraph>
     </div>
