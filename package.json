@@ -2,10 +2,10 @@
   "name": "blueone",
   "license": "GPL-3.0",
   "description": "탁송 관리 웹앱",
-  "packageManager": "npm@10.8.1",
+  "packageManager": "npm@11.6.0",
   "engines": {
-    "node": ">=v20.16.0",
-    "npm": ">=10.8.1"
+    "node": ">=v24.12.0",
+    "npm": ">=11.6.0"
   },
   "workspaces": [
     "apps/*",

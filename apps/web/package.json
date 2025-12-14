@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@ant-design/icons": "^5.4.0",
-    "@next/bundle-analyzer": "^14.2.5",
+    "@next/bundle-analyzer": "^14.2.35",
     "@svgr/webpack": "^6.1.2",
     "@tanstack/react-query": "^5.51.23",
     "@tanstack/react-query-devtools": "^5.51.23",
@@ -22,7 +22,7 @@
     "dayjs": "^1.10.7",
     "linkify-react": "^3.0.4",
     "linkifyjs": "^3.0.5",
-    "next": "14.2.5",
+    "next": "14.2.35",
     "pm2": "^5.1.2",
     "qs": "^6.10.2",
     "react": "18.3.0",
