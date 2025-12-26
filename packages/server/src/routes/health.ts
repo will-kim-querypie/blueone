@@ -14,7 +14,7 @@ router.get('/', (_req, res) => {
 router.get('/detailed', async (_req, res) => {
   try {
     const metrics = await getSystemMetrics();
-    const isHealthy = metrics.cpuUsage < 90 && metrics.memoryUsage < 90;
+    const isHealthy = metrics.cpuUsage < 90 && metrics.memoryUsage < 90 && metrics.disk.usagePercent < 95;
 
     res.status(isHealthy ? 200 : 503).json({
       status: isHealthy ? 'healthy' : 'degraded',
@@ -28,6 +28,12 @@ router.get('/detailed', async (_req, res) => {
           usage: metrics.memoryUsage,
           free: metrics.freeMemory,
           total: metrics.totalMemory,
+          unit: 'bytes',
+        },
+        disk: {
+          usage: metrics.disk.usagePercent,
+          free: metrics.disk.free,
+          total: metrics.disk.total,
           unit: 'bytes',
         },
         loadAverage: metrics.loadAverage,
