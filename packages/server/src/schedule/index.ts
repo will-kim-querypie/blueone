@@ -39,13 +39,17 @@ const jobs = [
     },
     logging: true,
   },
-  {
-    name: 'System health check',
-    cron: '0 */5 * * * *', // 5분마다
-    timezone: 'Asia/Seoul',
-    callback: checkSystemHealth,
-    logging: false,
-  },
+  ...(process.env.NODE_ENV === 'production'
+    ? [
+        {
+          name: 'System health check',
+          cron: '0 */5 * * * *', // 5분마다
+          timezone: 'Asia/Seoul',
+          callback: checkSystemHealth,
+          logging: false,
+        },
+      ]
+    : []),
 ];
 
 export default function runJobs() {
