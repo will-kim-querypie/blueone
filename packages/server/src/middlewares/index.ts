@@ -1,6 +1,8 @@
 import type { RequestHandler, ErrorRequestHandler } from 'express';
 import logger from '@/utils/logger';
 
+export { apiLimiter, loginLimiter } from './rateLimiter';
+
 export const isLoggedIn: RequestHandler = (req, res, next) => {
   if (req.isAuthenticated()) {
     next();

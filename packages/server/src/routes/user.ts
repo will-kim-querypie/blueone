@@ -3,7 +3,7 @@ import express from 'express';
 import passport from 'passport';
 import { Op } from 'sequelize';
 import type { DatePickQuery, QueryTypedRequest } from 'typings';
-import { isLoggedIn, isNotLoggedIn } from '@/middlewares';
+import { isLoggedIn, isNotLoggedIn, loginLimiter } from '@/middlewares';
 import { User, UserInfo, Work } from '@/models';
 import addFloats from '@/utils/add-floats';
 import calculatePayout, { withPayout } from '@/utils/calculate-payout';
@@ -48,7 +48,7 @@ router.get('/', isLoggedIn, async (req, res, next) => {
 /**
  * 로그인
  */
-router.post('/sign-in', isNotLoggedIn, (req, res, next) => {
+router.post('/sign-in', loginLimiter, isNotLoggedIn, (req, res, next) => {
   passport.authenticate(
     'local',
     (serverError: unknown, user: User, clientError: unknown) => {

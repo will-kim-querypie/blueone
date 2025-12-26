@@ -9,7 +9,7 @@ import morgan from 'morgan';
 import passport from 'passport';
 import fileStoreFactory from 'session-file-store';
 import passportConfig from '@/auth';
-import { errorHandler, errorLogger } from '@/middlewares';
+import { errorHandler, errorLogger, apiLimiter } from '@/middlewares';
 import db from '@/models';
 import { userRouter, usersRouter, worksRouter, noticesRouter, healthRouter } from '@/routes';
 import runJobs from '@/schedule';
@@ -33,6 +33,7 @@ if (process.env.NODE_ENV === 'production') {
   app.use(morgan('combined'));
   app.use(hpp());
   app.use(helmet());
+  app.use(apiLimiter);
   app.use(
     cors({
       origin: 'https://blueone.vercel.app',
@@ -94,6 +95,6 @@ runJobs();
 app.listen('8001', async () => {
   console.log('Server listening on port: 8001');
   if (process.env.NODE_ENV === 'production') {
-    await sendSlackAlert('📢 서버가 시작되었습니다');
+    await sendSlackAlert('[알림] 서버가 시작되었습니다');
   }
 });
