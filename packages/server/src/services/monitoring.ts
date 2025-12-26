@@ -138,6 +138,7 @@ export async function sendSlackAlert(message: string): Promise<void> {
         },
       },
       (res) => {
+        res.resume(); // 응답 본문을 소비하여 연결 정리
         if (res.statusCode === 200) {
           logger.info('[Monitoring] Slack alert sent successfully');
           resolve();
