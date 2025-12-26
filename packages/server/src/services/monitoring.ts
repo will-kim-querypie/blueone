@@ -164,10 +164,6 @@ export async function checkSystemHealth(): Promise<void> {
     const alerts: string[] = [];
     const diskAlerts: string[] = [];
 
-    logger.info(
-      `[Monitoring] CPU: ${metrics.cpuUsage}%, Memory: ${metrics.memoryUsage}%, Disk: ${metrics.disk.usagePercent}%`,
-    );
-
     if (metrics.cpuUsage >= ALERT_THRESHOLD) {
       alerts.push(`CPU usage is at ${metrics.cpuUsage}%`);
     }

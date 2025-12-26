@@ -29,14 +29,8 @@ const jobs = [
         });
 
         await Promise.all(
-          recentBookingWorks.map(async (bookingWork) => {
-            const newWorkInfo = omit(
-              bookingWork.get(),
-              'id',
-              'bookingDate',
-              'createdAt',
-              'updatedAt',
-            );
+          recentBookingWorks.map(async bookingWork => {
+            const newWorkInfo = omit(bookingWork.get(), 'id', 'bookingDate', 'createdAt', 'updatedAt');
             await work.create(newWorkInfo);
             await bookingWork.destroy();
           }),
@@ -45,19 +39,21 @@ const jobs = [
         logger.error(err);
       }
     },
+    logging: true,
   },
   {
     name: 'System health check',
     cron: '0 */5 * * * *', // 5분마다
     timezone: 'Asia/Seoul',
     callback: checkSystemHealth,
+    logging: false,
   },
 ];
 
 export default function runJobs() {
-  jobs.forEach(({ name, cron, timezone, callback }) => {
+  jobs.forEach(({ name, cron, timezone, callback, logging }) => {
     schedule.scheduleJob(name, cron, timezone, async () => {
-      logger.info(`[Run job] ${name}`);
+      if (logging) logger.info(`[Run job] ${name}`);
       await callback();
     });
   });
