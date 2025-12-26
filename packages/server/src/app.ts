@@ -13,6 +13,7 @@ import { errorHandler, errorLogger } from '@/middlewares';
 import db from '@/models';
 import { userRouter, usersRouter, worksRouter, noticesRouter, healthRouter } from '@/routes';
 import runJobs from '@/schedule';
+import { sendSlackAlert } from '@/services/monitoring';
 
 const FileStore = fileStoreFactory(session);
 dotenv.config();
@@ -90,6 +91,9 @@ app.use(errorHandler);
 
 runJobs();
 
-app.listen('8001', () => {
+app.listen('8001', async () => {
   console.log('Server listening on port: 8001');
+  if (process.env.NODE_ENV === 'production') {
+    await sendSlackAlert('📢 서버가 시작되었습니다');
+  }
 });

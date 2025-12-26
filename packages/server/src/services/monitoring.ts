@@ -66,7 +66,7 @@ function formatBytes(bytes: number): string {
   return `${gb.toFixed(2)} GB`;
 }
 
-async function sendSlackAlert(message: string): Promise<void> {
+export async function sendSlackAlert(message: string): Promise<void> {
   const webhookUrl = process.env.SLACK_WEBHOOK_URL;
 
   if (!webhookUrl) {
