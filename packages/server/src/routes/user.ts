@@ -234,9 +234,7 @@ router.get(
             [Op.gt]: firstDateOfRange,
           },
         },
-        attributes: {
-          include: ['charge', 'subsidy', 'checkTime'],
-        },
+        attributes: ['charge', 'subsidy', 'checkTime'],
         order: [['createdAt', 'DESC']],
       });
 
