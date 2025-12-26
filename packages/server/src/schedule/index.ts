@@ -2,6 +2,7 @@ import schedule from 'node-schedule-tz';
 import { Op } from 'sequelize';
 import { Work } from '@/models';
 import work from '@/models/work';
+import { checkSystemHealth } from '@/services';
 import dayjs from '@/utils/dayjs';
 import logger from '@/utils/logger';
 import omit from '@/utils/omit';
@@ -44,6 +45,12 @@ const jobs = [
         logger.error(err);
       }
     },
+  },
+  {
+    name: 'System health check',
+    cron: '0 */5 * * * *', // 5분마다
+    timezone: 'Asia/Seoul',
+    callback: checkSystemHealth,
   },
 ];
 

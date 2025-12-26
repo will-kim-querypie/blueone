@@ -11,7 +11,7 @@ import fileStoreFactory from 'session-file-store';
 import passportConfig from '@/auth';
 import { errorHandler, errorLogger } from '@/middlewares';
 import db from '@/models';
-import { userRouter, usersRouter, worksRouter, noticesRouter } from '@/routes';
+import { userRouter, usersRouter, worksRouter, noticesRouter, healthRouter } from '@/routes';
 import runJobs from '@/schedule';
 
 const FileStore = fileStoreFactory(session);
@@ -84,6 +84,7 @@ app.use('/user', userRouter);
 app.use('/users', usersRouter);
 app.use('/works', worksRouter);
 app.use('/notices', noticesRouter);
+app.use('/health', healthRouter);
 app.use(errorLogger);
 app.use(errorHandler);
 
