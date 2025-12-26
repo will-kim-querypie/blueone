@@ -52,7 +52,10 @@ if (process.env.NODE_ENV === 'production') {
         maxAge: 14 * (24 * 60 * 60 * 1000),
         sameSite: 'none',
       },
-      store: new FileStore({}),
+      store: new FileStore({
+        ttl: 14 * 24 * 60 * 60, // 14일 (초 단위, cookie maxAge와 일치)
+        reapInterval: 60 * 60, // 1시간마다 만료 세션 정리
+      }),
     }),
   );
 } else {
@@ -72,7 +75,10 @@ if (process.env.NODE_ENV === 'production') {
         httpOnly: true,
         maxAge: 14 * (24 * 60 * 60 * 1000),
       },
-      store: new FileStore({}),
+      store: new FileStore({
+        ttl: 14 * 24 * 60 * 60, // 14일 (초 단위, cookie maxAge와 일치)
+        reapInterval: 60 * 60, // 1시간마다 만료 세션 정리
+      }),
     }),
   );
 }
