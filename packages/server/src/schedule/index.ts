@@ -28,13 +28,11 @@ const jobs = [
           },
         });
 
-        await Promise.all(
-          recentBookingWorks.map(async bookingWork => {
-            const newWorkInfo = omit(bookingWork.get(), 'id', 'bookingDate', 'createdAt', 'updatedAt');
-            await work.create(newWorkInfo);
-            await bookingWork.destroy();
-          }),
-        );
+        for (const bookingWork of recentBookingWorks) {
+          const newWorkInfo = omit(bookingWork.get(), 'id', 'bookingDate', 'createdAt', 'updatedAt');
+          await work.create(newWorkInfo);
+          await bookingWork.destroy();
+        }
       } catch (err) {
         logger.error(err);
       }
