@@ -19,12 +19,49 @@ interface SystemMetrics {
   disk: DiskMetrics;
 }
 
+interface Diagnostics {
+  topProcesses: string;
+  nodeProcess: { heapUsed: number; heapTotal: number; rss: number; uptime: number };
+  pm2Info: string;
+  networkInfo: { established: number; timeWait: number };
+  topIPs: { tcpConnections: string; httpRequests: string };
+  synFlood: number;
+  systemUptime: number;
+}
+
 const ALERT_THRESHOLD = 80;
 const DISK_ALERT_THRESHOLD = 90;
 const COOLDOWN_MS = 15 * 60 * 1000;
 
 let lastAlertTime = 0;
 let lastDiskAlertTime = 0;
+
+// --- Helper functions ---
+
+function execAsync(cmd: string, timeout = 5000): Promise<string> {
+  return new Promise((resolve) => {
+    exec(cmd, { timeout }, (err, stdout) => {
+      resolve(err ? '' : stdout.trim());
+    });
+  });
+}
+
+function formatDuration(seconds: number): string {
+  const days = Math.floor(seconds / 86400);
+  const hours = Math.floor((seconds % 86400) / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const parts: string[] = [];
+  if (days > 0) parts.push(`${days}d`);
+  if (hours > 0) parts.push(`${hours}h`);
+  parts.push(`${minutes}m`);
+  return parts.join(' ');
+}
+
+function formatMB(bytes: number): string {
+  return `${Math.round(bytes / (1024 * 1024))}MB`;
+}
+
+// --- Existing functions ---
 
 function cpuAverage(): { idle: number; total: number } {
   const cpus = os.cpus();
@@ -111,6 +148,216 @@ function formatBytes(bytes: number): string {
   return `${gb.toFixed(2)} GB`;
 }
 
+// --- Diagnostics collection ---
+
+async function getTopProcesses(): Promise<string> {
+  const output = await execAsync('ps -eo pid,pcpu,pmem,rss,comm --sort=-pcpu | head -6');
+  if (!output) return '';
+
+  const lines = output.split('\n');
+  const header = lines[0];
+  const processes = lines.slice(1).map((line) => {
+    const parts = line.trim().split(/\s+/);
+    if (parts.length >= 4) {
+      const rssKb = parseInt(parts[3], 10);
+      if (!isNaN(rssKb)) {
+        parts[3] = formatMB(rssKb * 1024);
+      }
+    }
+    return '  ' + parts.join('  ');
+  });
+  return '  ' + header.trim() + '\n' + processes.join('\n');
+}
+
+function getNodeProcessInfo(): Diagnostics['nodeProcess'] {
+  const mem = process.memoryUsage();
+  return {
+    heapUsed: mem.heapUsed,
+    heapTotal: mem.heapTotal,
+    rss: mem.rss,
+    uptime: process.uptime(),
+  };
+}
+
+async function getPM2Info(): Promise<string> {
+  const output = await execAsync('pm2 jlist');
+  if (!output) return '';
+
+  try {
+    const list = JSON.parse(output) as Array<{
+      name: string;
+      pm2_env?: { restart_time?: number; pm_uptime?: number };
+      monit?: { memory?: number };
+    }>;
+    if (list.length === 0) return '';
+
+    const app = list[0];
+    const restarts = app.pm2_env?.restart_time ?? 'N/A';
+    const uptime =
+      app.pm2_env?.pm_uptime != null
+        ? formatDuration((Date.now() - app.pm2_env.pm_uptime) / 1000)
+        : 'N/A';
+    const mem = app.monit?.memory != null ? formatMB(app.monit.memory) : 'N/A';
+    return `Restarts: ${restarts} | Uptime: ${uptime} | Mem: ${mem}`;
+  } catch {
+    return '';
+  }
+}
+
+async function getNetworkInfo(): Promise<Diagnostics['networkInfo']> {
+  const [estOutput, twOutput] = await Promise.all([
+    execAsync('ss -tna state established | tail -n +2 | wc -l'),
+    execAsync('ss -tna state time-wait | tail -n +2 | wc -l'),
+  ]);
+  return {
+    established: parseInt(estOutput, 10) || 0,
+    timeWait: parseInt(twOutput, 10) || 0,
+  };
+}
+
+async function getTopIPs(): Promise<Diagnostics['topIPs']> {
+  // TCP connections by IP
+  const tcpOutput = await execAsync(
+    "ss -tna state established | awk 'NR>1{print $4}' | rev | cut -d: -f2- | rev | sort | uniq -c | sort -rn | head -5",
+  );
+
+  let tcpConnections = '';
+  if (tcpOutput) {
+    tcpConnections = tcpOutput
+      .split('\n')
+      .map((line) => {
+        const match = line.trim().match(/^(\d+)\s+(.+)$/);
+        return match ? `  ${match[2]}  \u2014 ${Number(match[1]).toLocaleString()} connections` : '';
+      })
+      .filter(Boolean)
+      .join('\n');
+  }
+
+  // Nginx access log - last 5 minutes
+  const logPath = process.env.NGINX_ACCESS_LOG || '/var/log/nginx/access.log';
+  let httpRequests = '';
+
+  const httpOutput = await execAsync(
+    `test -r "${logPath}" && awk -v s="$(date -d '5 minutes ago' '+%d/%b/%Y:%H:%M' 2>/dev/null || date -v-5M '+%d/%b/%Y:%H:%M' 2>/dev/null)" '{t=substr($4,2,17);if(t>=s)print $1}' "${logPath}" | sort | uniq -c | sort -rn | head -5`,
+  );
+
+  if (httpOutput) {
+    httpRequests = httpOutput
+      .split('\n')
+      .map((line) => {
+        const match = line.trim().match(/^(\d+)\s+(.+)$/);
+        return match ? `  ${match[2]}  \u2014 ${Number(match[1]).toLocaleString()} requests` : '';
+      })
+      .filter(Boolean)
+      .join('\n');
+  }
+
+  return { tcpConnections, httpRequests };
+}
+
+async function getSynFloodInfo(): Promise<number> {
+  const output = await execAsync('ss -tna state syn-recv | tail -n +2 | wc -l');
+  return parseInt(output, 10) || 0;
+}
+
+async function collectDiagnostics(): Promise<Diagnostics> {
+  const nodeProcess = getNodeProcessInfo();
+  const systemUptime = os.uptime();
+
+  const [topProcesses, pm2Info, networkInfo, topIPs, synFlood] = await Promise.all([
+    getTopProcesses(),
+    getPM2Info(),
+    getNetworkInfo(),
+    getTopIPs(),
+    getSynFloodInfo(),
+  ]);
+
+  return { topProcesses, nodeProcess, pm2Info, networkInfo, topIPs, synFlood, systemUptime };
+}
+
+// --- Alert formatting ---
+
+function formatDiagnosticMessage(
+  hostname: string,
+  alerts: string[],
+  metrics: SystemMetrics,
+  diagnostics: Diagnostics,
+): string {
+  const lines: string[] = [];
+
+  lines.push(`:rotating_light: *Blueone Server Alert* (${hostname})`);
+  lines.push(`System Uptime: ${formatDuration(diagnostics.systemUptime)}`);
+  lines.push('');
+
+  for (const alert of alerts) {
+    lines.push(`\u2022 ${alert}`);
+  }
+  lines.push('');
+
+  // Load Average with trend
+  const [load1, , load15] = metrics.loadAverage;
+  const cpuCount = os.cpus().length;
+  const loadEmoji = load1 > cpuCount ? '\uD83D\uDD34' : load1 > cpuCount * 0.7 ? '\uD83D\uDFE1' : '\uD83D\uDFE2';
+  lines.push(
+    `Load Average: ${loadEmoji} ${metrics.loadAverage.map((l) => l.toFixed(2)).join(', ')} (${cpuCount} cores)`,
+  );
+
+  if (load1 > load15 * 1.2) {
+    lines.push('Load is rising \u2191');
+  } else if (load1 < load15 * 0.8) {
+    lines.push('Load is falling \u2193');
+  }
+  lines.push('');
+
+  if (diagnostics.topProcesses) {
+    lines.push('Top Processes (by CPU):');
+    lines.push(diagnostics.topProcesses);
+    lines.push('');
+  }
+
+  if (diagnostics.topIPs.tcpConnections) {
+    lines.push('Top IPs (by TCP connections):');
+    lines.push(diagnostics.topIPs.tcpConnections);
+    lines.push('');
+  }
+
+  if (diagnostics.topIPs.httpRequests) {
+    lines.push('Top IPs (by HTTP requests, last 5m):');
+    lines.push(diagnostics.topIPs.httpRequests);
+    lines.push('');
+  }
+
+  if (diagnostics.synFlood > 0) {
+    lines.push(`\u26A0\uFE0F SYN_RECV: ${diagnostics.synFlood} (possible SYN flood)`);
+    lines.push('');
+  }
+
+  // Node.js process
+  const { heapUsed, heapTotal, rss, uptime } = diagnostics.nodeProcess;
+  const heapPercent = Math.round((heapUsed / heapTotal) * 100);
+  lines.push('Node.js Process:');
+  lines.push(`  Heap: ${formatMB(heapUsed)} / ${formatMB(heapTotal)} (${heapPercent}%) | RSS: ${formatMB(rss)}`);
+  lines.push(`  Uptime: ${formatDuration(uptime)}`);
+  lines.push('');
+
+  if (diagnostics.pm2Info) {
+    lines.push('PM2 Status:');
+    lines.push(`  ${diagnostics.pm2Info}`);
+    lines.push('');
+  }
+
+  if (diagnostics.networkInfo.established > 0 || diagnostics.networkInfo.timeWait > 0) {
+    lines.push('Network:');
+    lines.push(
+      `  TCP Established: ${diagnostics.networkInfo.established} | TIME_WAIT: ${diagnostics.networkInfo.timeWait}`,
+    );
+  }
+
+  return lines.join('\n');
+}
+
+// --- Slack ---
+
 export async function sendSlackAlert(message: string): Promise<void> {
   const webhookUrl = process.env.SLACK_WEBHOOK_URL;
 
@@ -159,6 +406,8 @@ export async function sendSlackAlert(message: string): Promise<void> {
   });
 }
 
+// --- Health check ---
+
 export async function checkSystemHealth(): Promise<void> {
   try {
     const metrics = await getSystemMetrics();
@@ -186,26 +435,31 @@ export async function checkSystemHealth(): Promise<void> {
     const now = Date.now();
     const hostname = os.hostname();
 
-    if (alerts.length > 0 && now - lastAlertTime >= COOLDOWN_MS) {
-      const message =
-        `:rotating_light: *Blueone Server Alert* (${hostname})\n\n` +
-        alerts.map((a) => `• ${a}`).join('\n') +
-        `\n\nLoad Average: ${metrics.loadAverage.map((l) => l.toFixed(2)).join(', ')}`;
+    const shouldSendAlert = alerts.length > 0 && now - lastAlertTime >= COOLDOWN_MS;
+    const shouldSendDiskAlert = diskAlerts.length > 0 && now - lastDiskAlertTime >= COOLDOWN_MS;
 
-      await sendSlackAlert(message);
-      lastAlertTime = now;
-    } else if (alerts.length > 0) {
-      logger.info('[Monitoring] CPU/Memory alert suppressed due to cooldown');
+    if (!shouldSendAlert && !shouldSendDiskAlert) {
+      if (alerts.length > 0) {
+        logger.info('[Monitoring] CPU/Memory alert suppressed due to cooldown');
+      }
+      if (diskAlerts.length > 0) {
+        logger.info('[Monitoring] Disk alert suppressed due to cooldown');
+      }
+      return;
     }
 
-    if (diskAlerts.length > 0 && now - lastDiskAlertTime >= COOLDOWN_MS) {
-      const message =
-        `:rotating_light: *Blueone Server Alert* (${hostname})\n\n` + diskAlerts.map((a) => `• ${a}`).join('\n');
+    const diagnostics = await collectDiagnostics();
 
+    if (shouldSendAlert) {
+      const message = formatDiagnosticMessage(hostname, alerts, metrics, diagnostics);
+      await sendSlackAlert(message);
+      lastAlertTime = now;
+    }
+
+    if (shouldSendDiskAlert) {
+      const message = formatDiagnosticMessage(hostname, diskAlerts, metrics, diagnostics);
       await sendSlackAlert(message);
       lastDiskAlertTime = now;
-    } else if (diskAlerts.length > 0) {
-      logger.info('[Monitoring] Disk alert suppressed due to cooldown');
     }
   } catch (err) {
     logger.error(`[Monitoring] Health check failed: ${err}`);
