@@ -81,17 +81,20 @@ function cpuAverage(): { idle: number; total: number } {
   };
 }
 
-async function getCpuUsage(): Promise<number> {
-  const startMeasure = cpuAverage();
+let lastCpuAvg = cpuAverage();
+let lastCpuTime = Date.now();
+let lastCpuUsage = 0;
 
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
-  const endMeasure = cpuAverage();
-
-  const idleDiff = endMeasure.idle - startMeasure.idle;
-  const totalDiff = endMeasure.total - startMeasure.total;
-
-  return 100 - Math.floor((100 * idleDiff) / totalDiff);
+function getCpuUsageNonBlocking(): number {
+  const now = Date.now();
+  if (now - lastCpuTime < 5000) return lastCpuUsage;
+  const current = cpuAverage();
+  const idleDiff = current.idle - lastCpuAvg.idle;
+  const totalDiff = current.total - lastCpuAvg.total;
+  lastCpuUsage = totalDiff > 0 ? 100 - Math.floor((100 * idleDiff) / totalDiff) : 0;
+  lastCpuAvg = current;
+  lastCpuTime = now;
+  return lastCpuUsage;
 }
 
 async function getDiskMetrics(): Promise<DiskMetrics> {
@@ -126,14 +129,23 @@ async function getDiskMetrics(): Promise<DiskMetrics> {
   });
 }
 
+let cachedMetrics: SystemMetrics | null = null;
+let cachedMetricsTime = 0;
+const METRICS_CACHE_TTL_MS = 30_000;
+
 export async function getSystemMetrics(): Promise<SystemMetrics> {
-  const cpuUsage = await getCpuUsage();
+  const now = Date.now();
+  if (cachedMetrics && now - cachedMetricsTime < METRICS_CACHE_TTL_MS) {
+    return cachedMetrics;
+  }
+
+  const cpuUsage = getCpuUsageNonBlocking();
   const totalMemory = os.totalmem();
   const freeMemory = os.freemem();
   const memoryUsage = Math.round(((totalMemory - freeMemory) / totalMemory) * 100);
   const disk = await getDiskMetrics();
 
-  return {
+  cachedMetrics = {
     cpuUsage,
     memoryUsage,
     freeMemory,
@@ -141,6 +153,8 @@ export async function getSystemMetrics(): Promise<SystemMetrics> {
     loadAverage: os.loadavg(),
     disk,
   };
+  cachedMetricsTime = now;
+  return cachedMetrics;
 }
 
 function formatBytes(bytes: number): string {
@@ -260,7 +274,7 @@ async function getSynFloodInfo(): Promise<number> {
   return parseInt(output, 10) || 0;
 }
 
-async function collectDiagnostics(): Promise<Diagnostics> {
+async function collectDiagnosticsImpl(): Promise<Diagnostics> {
   const nodeProcess = getNodeProcessInfo();
   const systemUptime = os.uptime();
 
@@ -273,6 +287,22 @@ async function collectDiagnostics(): Promise<Diagnostics> {
   ]);
 
   return { topProcesses, nodeProcess, pm2Info, networkInfo, topIPs, synFlood, systemUptime };
+}
+
+const DIAGNOSTICS_TIMEOUT_MS = 10_000;
+
+async function collectDiagnostics(): Promise<Diagnostics | null> {
+  try {
+    return await Promise.race([
+      collectDiagnosticsImpl(),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Diagnostics collection timed out')), DIAGNOSTICS_TIMEOUT_MS),
+      ),
+    ]);
+  } catch (err) {
+    logger.error(`[Monitoring] ${err}`);
+    return null;
+  }
 }
 
 // --- Alert formatting ---
@@ -408,7 +438,14 @@ export async function sendSlackAlert(message: string): Promise<void> {
 
 // --- Health check ---
 
+let isHealthCheckRunning = false;
+
 export async function checkSystemHealth(): Promise<void> {
+  if (isHealthCheckRunning) {
+    logger.info('[Monitoring] Health check skipped: previous run still in progress');
+    return;
+  }
+  isHealthCheckRunning = true;
   try {
     const metrics = await getSystemMetrics();
     const alerts: string[] = [];
@@ -451,17 +488,35 @@ export async function checkSystemHealth(): Promise<void> {
     const diagnostics = await collectDiagnostics();
 
     if (shouldSendAlert) {
-      const message = formatDiagnosticMessage(hostname, alerts, metrics, diagnostics);
-      await sendSlackAlert(message);
+      if (diagnostics) {
+        const message = formatDiagnosticMessage(hostname, alerts, metrics, diagnostics);
+        await sendSlackAlert(message);
+      } else {
+        await sendSlackAlert(
+          `:rotating_light: *Blueone Server Alert* (${hostname})\n` +
+            alerts.map((a) => `\u2022 ${a}`).join('\n') +
+            `\n\n_(Diagnostics collection timed out)_`,
+        );
+      }
       lastAlertTime = now;
     }
 
     if (shouldSendDiskAlert) {
-      const message = formatDiagnosticMessage(hostname, diskAlerts, metrics, diagnostics);
-      await sendSlackAlert(message);
+      if (diagnostics) {
+        const message = formatDiagnosticMessage(hostname, diskAlerts, metrics, diagnostics);
+        await sendSlackAlert(message);
+      } else {
+        await sendSlackAlert(
+          `:rotating_light: *Blueone Server Alert* (${hostname})\n` +
+            diskAlerts.map((a) => `\u2022 ${a}`).join('\n') +
+            `\n\n_(Diagnostics collection timed out)_`,
+        );
+      }
       lastDiskAlertTime = now;
     }
   } catch (err) {
     logger.error(`[Monitoring] Health check failed: ${err}`);
+  } finally {
+    isHealthCheckRunning = false;
   }
 }

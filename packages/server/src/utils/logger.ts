@@ -27,9 +27,9 @@ const logger = createLogger({
     }),
     // format.json(),
     format.printf((info) => {
-      return JSON.stringify(info) //
-        .replace(/{/g, '-----\r\n')
-        .replace(/}/g, '');
+      const { timestamp, level, message, ...rest } = info;
+      const meta = Object.keys(rest).length ? ` ${JSON.stringify(rest)}` : '';
+      return `${timestamp} [${level}]: ${message}${meta}`;
     }),
   ),
   transports: [

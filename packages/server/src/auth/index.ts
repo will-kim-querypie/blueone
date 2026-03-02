@@ -9,7 +9,9 @@ export default () => {
 
   passport.deserializeUser<User['id']>(async (id, done) => {
     try {
-      const user = await User.findByPk(id);
+      const user = await User.findByPk(id, {
+        attributes: { exclude: ['password'] },
+      });
       return done(null, user); // req.user
     } catch (err) {
       return done(err);

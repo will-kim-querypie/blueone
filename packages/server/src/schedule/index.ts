@@ -1,7 +1,7 @@
 import schedule from 'node-schedule-tz';
 import { Op } from 'sequelize';
 import { Work } from '@/models';
-import work from '@/models/work';
+import sequelize from '@/models/_sequelize';
 import { checkSystemHealth } from '@/services';
 import dayjs from '@/utils/dayjs';
 import logger from '@/utils/logger';
@@ -28,10 +28,17 @@ const jobs = [
           },
         });
 
-        for (const bookingWork of recentBookingWorks) {
-          const newWorkInfo = omit(bookingWork.get(), 'id', 'bookingDate', 'createdAt', 'updatedAt');
-          await work.create(newWorkInfo);
-          await bookingWork.destroy();
+        const transaction = await sequelize.transaction();
+        try {
+          for (const bookingWork of recentBookingWorks) {
+            const newWorkInfo = omit(bookingWork.get(), 'id', 'bookingDate', 'createdAt', 'updatedAt');
+            await Work.create(newWorkInfo, { transaction });
+            await bookingWork.destroy({ transaction });
+          }
+          await transaction.commit();
+        } catch (err) {
+          await transaction.rollback();
+          throw err;
         }
       } catch (err) {
         logger.error(err);

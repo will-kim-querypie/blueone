@@ -105,30 +105,30 @@ router.get('/activation', isLoggedIn, async (req, res, next) => {
           },
         },
       },
-      include: [
-        {
-          model: User,
-          as: 'confirmedUsers',
-          attributes: ['id'],
-          through: { attributes: [] },
-        },
-      ],
       order: [['createdAt', 'DESC']],
     });
 
-    const setIsConfirmedField = (notice: Notice) => {
-      const noticeData = notice.get({ plain: true }) as NoticeWithConfirmedUsers;
-      const { confirmedUsers, ...noticeWithoutConfirmedUsers } = noticeData;
-      const confirmedUserIds = (confirmedUsers || []).map(user => user.id);
+    if (activatedNoticeList.length === 0) {
+      res.status(200).json([]);
+      return;
+    }
 
-      const result: NoticeDtoForSubcontractor = {
-        ...noticeWithoutConfirmedUsers,
-        isConfirmed: confirmedUserIds.includes(currentUserId),
-      };
-      return result;
-    };
+    const confirmedNoticeIds = new Set(
+      (
+        await NoticeConfirmation.findAll({
+          where: {
+            userId: currentUserId,
+            noticeId: activatedNoticeList.map((n) => n.id),
+          },
+          attributes: ['noticeId'],
+        })
+      ).map((c) => c.noticeId),
+    );
 
-    const response = activatedNoticeList.map(setIsConfirmedField);
+    const response: NoticeDtoForSubcontractor[] = activatedNoticeList.map((notice) => ({
+      ...notice.get({ plain: true }),
+      isConfirmed: confirmedNoticeIds.has(notice.id),
+    }));
 
     res.status(200).json(response);
   } catch (err) {
