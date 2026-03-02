@@ -21,6 +21,12 @@
     "lint": {
       "dependsOn": ["^lint"],
       "inputs": ["**/*.{ts,tsx,js,jsx}", ".eslintrc.*", ".eslintignore", "!node_modules/**"]
+    },
+    "test": {
+      "cache": false
+    },
+    "test:run": {
+      "cache": false
     }
   }
 }

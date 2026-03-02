@@ -1,0 +1,22 @@
+{
+  "name": "@blueone/test-utils",
+  "version": "1.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./react": "./src/react/index.ts",
+    "./react/setup": "./src/react/setup.ts"
+  },
+  "dependencies": {
+    "@testing-library/react": "^16",
+    "@testing-library/jest-dom": "^6",
+    "@testing-library/user-event": "^14",
+    "jsdom": "^25"
+  },
+  "peerDependencies": {
+    "react": "^18",
+    "react-dom": "^18",
+    "@tanstack/react-query": "^5",
+    "vitest": ">=2"
+  }
+}

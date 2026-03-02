@@ -13,7 +13,9 @@
     "restart": "npm run exit && npm run build && npm run start",
     "exit": "pm2 kill",
     "db:create": "cross-env NODE_ENV=production ts-node -r tsconfig-paths/register --files src/config/exec.ts --create",
-    "db:migrate": "cross-env NODE_ENV=production ts-node -r tsconfig-paths/register --files src/config/exec.ts --migrate"
+    "db:migrate": "cross-env NODE_ENV=production ts-node -r tsconfig-paths/register --files src/config/exec.ts --migrate",
+    "test": "vitest",
+    "test:run": "vitest run"
   },
   "keywords": [],
   "author": "",

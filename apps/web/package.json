@@ -6,7 +6,9 @@
     "start": "pm2 start npm --name \"next\" -- start && npx pm2 monit",
     "check-types": "tsc --noEmit",
     "lint": "eslint src --fix --ext .ts,.tsx",
-    "clean": "rm -rf node_modules"
+    "clean": "rm -rf node_modules",
+    "test": "vitest",
+    "test:run": "vitest run"
   },
   "dependencies": {
     "@ant-design/icons": "^5.4.0",
@@ -32,6 +34,7 @@
     "react-fast-marquee": "^1.6.5"
   },
   "devDependencies": {
+    "@blueone/test-utils": "*",
     "@types/node": "18.19.44",
     "@types/qs": "^6.9.7",
     "@types/react": "18.3.0",
