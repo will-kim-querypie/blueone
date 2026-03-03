@@ -38,25 +38,27 @@ router.post('/', isLoggedIn, isContractor, async (req, res, next) => {
   const INITIAL_PASSWORD = '1234';
 
   try {
-    const existingUser = await User.findOne({ where: { phoneNumber } });
-
-    if (existingUser) {
-      res.status(409).json({
-        message: '이미 사용 중인 전화번호입니다.',
-      });
-      return;
-    }
-
     const hashedPassword = await bcrypt.hash(INITIAL_PASSWORD, 10);
-    const user = await User.create(
-      {
+    const [user, isCreated] = await User.findOrCreate({
+      where: { phoneNumber },
+      defaults: {
         role: 'subcontractor',
         phoneNumber,
         password: hashedPassword,
         UserInfo: restUserInfo,
       },
-      { include: [UserInfo] },
-    );
+      attributes: {
+        exclude: ['password'],
+      },
+      include: [UserInfo],
+    });
+
+    if (!isCreated) {
+      res.status(409).json({
+        message: '이미 사용 중인 전화번호입니다.',
+      });
+      return;
+    }
 
     res.status(201).json(omit(user.get(), 'password'));
   } catch (err) {
@@ -78,21 +80,22 @@ router.post('/contractor', async (req, res, next) => {
       return;
     }
 
-    const existingUser = await User.findOne({ where: { phoneNumber } });
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const [contractor, isCreated] = await User.findOrCreate({
+      where: { phoneNumber },
+      defaults: {
+        role: 'contractor',
+        phoneNumber,
+        password: hashedPassword,
+      },
+    });
 
-    if (existingUser) {
+    if (!isCreated) {
       res.status(409).json({
         message: '이미 사용 중인 전화번호입니다.',
       });
       return;
     }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const contractor = await User.create({
-      role: 'contractor',
-      phoneNumber,
-      password: hashedPassword,
-    });
 
     res.status(201).json(omit(contractor.get(), 'password'));
   } catch (err) {

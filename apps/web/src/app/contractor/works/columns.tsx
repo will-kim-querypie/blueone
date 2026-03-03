@@ -67,7 +67,7 @@ const columns: ColumnsType<Item> = [
     title: '기사',
     dataIndex: 'realname',
     align: 'center',
-    render: (_, record) => record.User?.UserInfo?.realname,
+    render: (_, record) => record.User?.UserInfo.realname,
     width: 80,
   },
   {
