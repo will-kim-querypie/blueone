@@ -264,7 +264,7 @@ export interface EndPoint {
     responses: {
       200: (Work & {
         User?: User & {
-          UserInfo: Pick<UserInfo, 'realname'>;
+          UserInfo: Pick<UserInfo, 'realname'> | null;
         };
       })[];
       500: APIError;
@@ -289,7 +289,7 @@ export interface EndPoint {
     responses: {
       200: Work & {
         User?: User & {
-          UserInfo: Pick<UserInfo, 'realname'>;
+          UserInfo: Pick<UserInfo, 'realname'> | null;
         };
       };
       500: APIError;
