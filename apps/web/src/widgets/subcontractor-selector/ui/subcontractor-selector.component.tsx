@@ -64,7 +64,7 @@ export default function SubcontractorSelector({ value, onChange, disabled = fals
               </>
             )}
 
-            {subcontractor.UserInfo.realname}
+            {subcontractor.UserInfo?.realname}
             <Divider type="vertical" />
             {processPhoneNumber(subcontractor.phoneNumber)}
           </Select.Option>

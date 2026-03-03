@@ -3,6 +3,7 @@ import { ONE_DAY } from '@/shared/config/time';
 import dayjs from '@/shared/lib/utils/dayjs';
 
 export type Model = GetMyInfoResponse;
+type ModelWithNullableUserInfo = Omit<Model, 'UserInfo'> & { UserInfo: Model['UserInfo'] | null };
 
 export const serviceEntry = (model: Model): string => {
   if (model.role === 'contractor') {
@@ -13,7 +14,7 @@ export const serviceEntry = (model: Model): string => {
 };
 
 export type InsuranceState = 'normal' | 'nearExpiration' | 'expired';
-export const insuranceInfo = (model: Model) => {
+export const insuranceInfo = (model: ModelWithNullableUserInfo) => {
   const expirationDate = dayjs(model.UserInfo?.insuranceExpirationDate); // TODO: contractor도 UserInfo 채워서 내려주기
   const now = dayjs();
 

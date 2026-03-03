@@ -168,7 +168,7 @@ export interface EndPoint {
   'GET /users': {
     responses: {
       200: (User & {
-        UserInfo: UserInfo;
+        UserInfo: UserInfo | null;
       })[];
       500: APIError;
     };
