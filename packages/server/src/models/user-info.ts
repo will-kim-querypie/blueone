@@ -9,9 +9,9 @@ const regex = {
   licenseNumber: /^[\d-가-힣ㄱ-ㅎ]{1,32}$/,
   insuranceNumber: /^[\d-]{1,32}$/,
 };
-const validate: { [column in keyof typeof regex]: ModelValidateOptions } = Object.fromEntries(
-  Object.entries(regex).map((column, regex) => [column, { is: regex }]),
-);
+const validate = Object.fromEntries(
+  Object.entries(regex).map(([column, regex]) => [column, { is: regex }]),
+) as { [column in keyof typeof regex]: ModelValidateOptions };
 
 class UserInfo extends Model {
   public readonly id!: number;
@@ -39,7 +39,6 @@ UserInfo.init(
     },
     realname: {
       type: DataTypes.STRING(32),
-      validate: validate.phoneNumber,
       allowNull: false,
     },
     dateOfBirth: {

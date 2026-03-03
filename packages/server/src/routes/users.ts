@@ -4,6 +4,7 @@ import express from 'express';
 import type { CreateUserRequestBody, UpdateUserRequestBody } from 'typings';
 import { isContractor, isLoggedIn } from '@/middlewares';
 import { User, UserInfo, Work, NoticeConfirmation } from '@/models';
+import sequelize from '@/models/_sequelize';
 import { withPayout } from '@/utils/calculate-payout';
 import omit from '@/utils/omit';
 import { getDefaultWhereParamsQueriedByWork } from '@/utils/query/work';
@@ -38,29 +39,30 @@ router.post('/', isLoggedIn, isContractor, async (req, res, next) => {
   const INITIAL_PASSWORD = '1234';
 
   try {
-    const hashedPassword = await bcrypt.hash(INITIAL_PASSWORD, 10);
-    const [user, isCreated] = await User.findOrCreate({
-      where: { phoneNumber },
-      defaults: {
-        role: 'subcontractor',
-        phoneNumber,
-        password: hashedPassword,
-        UserInfo: restUserInfo,
-      },
-      attributes: {
-        exclude: ['password'],
-      },
-      include: [UserInfo],
-    });
-
-    if (!isCreated) {
-      res.status(409).json({
-        message: '이미 사용 중인 전화번호입니다.',
-      });
+    const existingUser = await User.findOne({ where: { phoneNumber } });
+    if (existingUser) {
+      res.status(409).json({ message: '이미 사용 중인 전화번호입니다.' });
       return;
     }
 
-    res.status(201).json(omit(user.get(), 'password'));
+    const hashedPassword = await bcrypt.hash(INITIAL_PASSWORD, 10);
+    const transaction = await sequelize.transaction();
+    try {
+      const user = await User.create(
+        {
+          role: 'subcontractor',
+          phoneNumber,
+          password: hashedPassword,
+          UserInfo: restUserInfo,
+        },
+        { include: [UserInfo], transaction },
+      );
+      await transaction.commit();
+      res.status(201).json(omit(user.get(), 'password'));
+    } catch (err) {
+      await transaction.rollback();
+      throw err;
+    }
   } catch (err) {
     next(err);
   }
@@ -80,22 +82,18 @@ router.post('/contractor', async (req, res, next) => {
       return;
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const [contractor, isCreated] = await User.findOrCreate({
-      where: { phoneNumber },
-      defaults: {
-        role: 'contractor',
-        phoneNumber,
-        password: hashedPassword,
-      },
-    });
-
-    if (!isCreated) {
-      res.status(409).json({
-        message: '이미 사용 중인 전화번호입니다.',
-      });
+    const existingUser = await User.findOne({ where: { phoneNumber } });
+    if (existingUser) {
+      res.status(409).json({ message: '이미 사용 중인 전화번호입니다.' });
       return;
     }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const contractor = await User.create({
+      role: 'contractor',
+      phoneNumber,
+      password: hashedPassword,
+    });
 
     res.status(201).json(omit(contractor.get(), 'password'));
   } catch (err) {

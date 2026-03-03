@@ -26,7 +26,7 @@ class User extends Model {
   public static associate = (db: Database): void => {
     db.User.hasMany(db.Notice);
     db.User.hasMany(db.Work);
-    db.User.hasOne(db.UserInfo);
+    db.User.hasOne(db.UserInfo, { foreignKey: 'userId' });
     db.User.belongsToMany(db.Notice, {
       through: db.NoticeConfirmation,
       foreignKey: 'userId',
