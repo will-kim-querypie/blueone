@@ -25,12 +25,12 @@ export default function ListItem({ contractor }: Props) {
           id={contractor.id}
           initialValues={{
             phoneNumber: contractor.phoneNumber,
-            realname: contractor.UserInfo?.realname ?? '',
-            dateOfBirth: contractor.UserInfo?.dateOfBirth ?? '',
-            licenseNumber: contractor.UserInfo?.licenseNumber ?? '',
-            licenseType: contractor.UserInfo?.licenseType ?? '',
-            insuranceNumber: contractor.UserInfo?.insuranceNumber ?? '',
-            insuranceExpirationDate: contractor.UserInfo?.insuranceExpirationDate ?? '',
+            realname: contractor.UserInfo.realname,
+            dateOfBirth: contractor.UserInfo.dateOfBirth,
+            licenseNumber: contractor.UserInfo.licenseNumber,
+            licenseType: contractor.UserInfo.licenseType,
+            insuranceNumber: contractor.UserInfo.insuranceNumber,
+            insuranceExpirationDate: contractor.UserInfo.insuranceExpirationDate,
           }}
           trigger={({ openModal, isPending }) => (
             <Tooltip title="수정">
@@ -67,14 +67,14 @@ export default function ListItem({ contractor }: Props) {
             })}
           />
         }
-        title={renderTitle(insuranceInfo.state, contractor.UserInfo?.realname ?? '')}
+        title={renderTitle(insuranceInfo.state, contractor.UserInfo.realname)}
         description={
           <div className={cn({ 'line-through': insuranceInfo.state === 'expired' })}>
             <Typography.Text className="block">{processPhoneNumber(contractor.phoneNumber)}</Typography.Text>
             <Typography.Text className="block">
               {insuranceInfo.state === 'expired'
                 ? '보험이 만료되었습니다'
-                : `보험 만료일: ${contractor.UserInfo?.insuranceExpirationDate} (${insuranceInfo.to})`}
+                : `보험 만료일: ${contractor.UserInfo.insuranceExpirationDate} (${insuranceInfo.to})`}
             </Typography.Text>
           </div>
         }

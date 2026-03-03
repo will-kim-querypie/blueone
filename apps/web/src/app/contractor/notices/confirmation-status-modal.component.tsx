@@ -61,7 +61,7 @@ export default function ConfirmationStatusModal({ visible, onClose, confirmedUse
           {!confirmedUsers.length && '-'}
           {confirmedUsers.map(user => (
             <Tag key={user.id} className="mr-0">
-              {user.UserInfo?.realname}
+              {user.UserInfo.realname}
             </Tag>
           ))}
         </div>
@@ -72,7 +72,7 @@ export default function ConfirmationStatusModal({ visible, onClose, confirmedUse
           {!unconfirmedUsers.length && '-'}
           {unconfirmedUsers.map(user => (
             <Tag key={user.id} className="mr-0">
-              {user.UserInfo?.realname}
+              {user.UserInfo.realname}
             </Tag>
           ))}
         </div>
